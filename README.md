@@ -53,7 +53,7 @@ chmod +x install.sh
 
 Make sure you have the latest versions of **Docker** and **Docker Compose** installed on your machine.
 
-- [How install docker](https://docs.docker.com/engine/install/)
+- [How install docker](https://ranchermanager.docs.rancher.com/v2.6/getting-started/installation-and-upgrade/installation-requirements/install-docker)
 - [How install docker compose](https://docs.docker.com/compose/install/)
 
 Clone this repository or copy the files from this repository into a new folder.
