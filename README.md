@@ -27,7 +27,6 @@ Create rules to open ports to the internet, or to a specific IPv4 address or ran
 - [Auto Configuration and Installation](#automatic)
 - [Requirements](#requirements)
 - [Manual Configuration and Installation](#manual)
-- [Portainer Installation](#portainer)
 - [Usage](#usage)
 	- [Proxy](#proxy)					  
 
@@ -89,11 +88,7 @@ DIRECTORY_PATH=```pwd``` at command line
 
 ### Installation
 
-Firstly: will create external volume
-
-```
-docker volume create --driver local --opt type=none --opt device=${DIRECTORY_PATH}/certbot --opt o=bind certbot-etc
-```
+Firstly: Create and start containers
 
 ```
 docker compose up -d
