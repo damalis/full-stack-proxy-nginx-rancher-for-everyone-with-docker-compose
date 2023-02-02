@@ -21,10 +21,6 @@ echo "============================================"
 
 # install start
 sudo apt-get update
-# sudo apt-get install ca-certificates curl gnupg lsb-release
-# sudo mkdir -p /etc/apt/keyrings
-# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-# echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(grep -Po 'UBUNTU_CODENAME=\K[^;]*' /etc/os-release) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 curl https://releases.rancher.com/install-docker/20.10.sh | sh
 sudo apt-get update
 
@@ -147,9 +143,7 @@ sed -i 's/email@domain.com/'$email'/' .env
 sed -i "s@directory_path@$(pwd)@" .env
 sed -i 's/local_timezone/'$local_timezone'/' .env
 
-if [ -x "$(command -v docker)" ] && [ "$(docker compose version)" ]; then
-	# Firstly: create external volume
-	docker volume create --driver local --opt type=none --opt device=`pwd`/certbot --opt o=bind certbot-etc > /dev/null
+if [ -x "$(command -v docker)" ] && [ "$(docker compose version)" ]; then	
 	# installing Rancher and the other services
 	docker compose up -d & export pid=$!
 	echo "Rancher and the other services installing proceeding..."
