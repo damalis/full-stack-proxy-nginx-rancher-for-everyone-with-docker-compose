@@ -72,3 +72,8 @@ networks:
 volumes:
     certbot-etc:
         name: certbot-etc
+        driver: local
+        driver_opts:
+            type: none
+            device: ${DIRECTORY_PATH}/certbot
+            o: bind
