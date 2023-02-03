@@ -3,6 +3,8 @@ version: '3.7'
 services:
 
     rancher:
+        depends_on:
+            - certbot
         image: 'rancher/rancher:${RANCHER_IMAGE_VERSION}'
         container_name: rancher
         networks:
@@ -11,7 +13,9 @@ services:
         restart: unless-stopped
         ports:
             - '8080:80'
-        entrypoint: bash -c "tini -- rancher --http-listen-port=8080"
+            - '8443:443'
+        privileged: true        
+        entrypoint: bash -c "tini -- rancher --acme-domain ${DOMAIN_NAME}"
 
     certbot:
         depends_on:
@@ -30,8 +34,6 @@ services:
             trap exit TERM; while :; do certbot renew --dry-run; sleep 12h & wait $${!}; done;"
 
     proxy:
-        depends_on:
-            - rancher
         image: nginx:stable
         container_name: proxy
         networks:
@@ -44,9 +46,9 @@ services:
             - type: bind
               source: ./proxy/templates/proxy.conf.template
               target: '${PROXY_PREFIX}/templates/default.conf.template'
-            #- type: bind
-            #  source: ./proxy/ssl-option/options-ssl-nginx.conf
-            #  target: '${LETSENCRYPT_CONF_PREFIX}/options-ssl-nginx.conf'
+            - type: bind
+              source: ./proxy/ssl-option/options-ssl-nginx.conf
+              target: '${LETSENCRYPT_CONF_PREFIX}/options-ssl-nginx.conf'
             - type: bind
               source: ./ssl-proxyconf.sh
               target: '/tmp/ssl-proxyconf.sh'
@@ -57,8 +59,6 @@ services:
         ports:
             - '80:80'
             - '443:443'
-        links:
-            - rancher
         environment:
             NGINX_HOST: ${DOMAIN_NAME}
             NGINX_PORT: 80
