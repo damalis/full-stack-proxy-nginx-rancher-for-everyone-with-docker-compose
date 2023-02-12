@@ -18,7 +18,7 @@ services:
             - '8080:80'
             - '8443:443'
         privileged: true        
-        command: "--acme-domain ${DOMAIN_NAME}"
+        entrypoint: bash -c "rancher --acme-domain ${DOMAIN_NAME}"
 
     certbot:
         depends_on:
