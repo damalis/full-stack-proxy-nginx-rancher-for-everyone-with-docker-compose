@@ -21,6 +21,31 @@ echo "============================================"
 
 # install start
 sudo apt-get update
+
+cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+# sysctl params required by setup, params persist across reboots
+cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+sudo sed -i 's/-net.ipv4.conf.all.promote_secondaries/#net.ipv4.conf.all.promote_secondaries/g' /usr/lib/sysctl.d/50-default.conf
+sudo sed -i 's/-net.ipv4.ping_group_range/#net.ipv4.ping_group_range/g' /usr/lib/sysctl.d/50-default.conf
+
+# Apply sysctl params without reboot
+sudo sysctl --system
+
+# sudo uname -r
+# sudo apt-get dist-upgrade -y
+# sudo reboot
 curl https://releases.rancher.com/install-docker/20.10.sh | sh
 sudo apt-get update
 
