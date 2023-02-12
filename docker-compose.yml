@@ -18,7 +18,7 @@ services:
             - '8080:80'
             - '8443:443'
         privileged: true        
-        command: bash -c "entrypoint.sh --acme-domain ${DOMAIN_NAME}"
+        command: "--acme-domain ${DOMAIN_NAME}"
 
     certbot:
         depends_on:
