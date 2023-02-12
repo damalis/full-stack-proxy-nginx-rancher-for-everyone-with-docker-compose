@@ -52,7 +52,13 @@ chmod +x install.sh
 
 Make sure you have the latest versions of **Docker** and **Docker Compose** installed on your machine.
 
-- [These CPU and memory requirements apply to a host with a single-node installation of Rancher](https://ranchermanager.docs.rancher.com/v2.6/pages-for-subheaders/installation-requirements#docker)
+### These CPU and memory requirements apply to a host with a single-node installation of Rancher
+
+| Deployment Size | Clusters | Nodes | vCPUs | RAM |
+|---|---|---|---|---|
+| Small | Up to 5 | Up to 50 | 1 | 4 GB |
+| Medium | Up to 15 | Up to 200 | 2 | 8 GB |
+
 - [How install docker](https://ranchermanager.docs.rancher.com/v2.6/getting-started/installation-and-upgrade/installation-requirements/install-docker)
 - [How install docker compose](https://docs.docker.com/compose/install/)
 
