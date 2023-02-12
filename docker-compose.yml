@@ -9,13 +9,16 @@ services:
         container_name: rancher
         networks:
             - backend
+        volumes:
+            - './rancher/rancher:/var/lib/rancher'
+            - './rancher/rancher-data:/var/lib/rancher-data'
         hostname: rancher
         restart: unless-stopped
         ports:
             - '8080:80'
             - '8443:443'
         privileged: true        
-        entrypoint: bash -c "tini -- rancher --acme-domain ${DOMAIN_NAME}"
+        command: bash -c "entrypoint.sh --acme-domain ${DOMAIN_NAME}"
 
     certbot:
         depends_on:
