@@ -1,10 +1,9 @@
-version: '3.7'
-
 services:
 
     rancher:
         depends_on:
-            - certbot
+            certbot:
+                condition: service_healthy
         image: 'rancher/rancher:${RANCHER_IMAGE_VERSION}'
         container_name: rancher
         networks:
@@ -12,29 +11,44 @@ services:
         volumes:
             - './rancher/rancher:/var/lib/rancher'
             - './rancher/rancher-data:/var/lib/rancher-data'
+            - 'certbot-etc:${LETSENCRYPT_CONF_PREFIX}'
         hostname: rancher
         restart: unless-stopped
         ports:
             - '8080:80'
             - '8443:443'
-        privileged: true        
-        entrypoint: bash -c "rancher --acme-domain ${DOMAIN_NAME}"
+        links:
+            - proxy
+        privileged: true
+        cgroup: host
+        environment:
+            SSL_CERT_DIR: '${LETSENCRYPT_CONF_PREFIX}/live/${DOMAIN_NAME}'
+#            HTTP_PROXY: 'http://proxy:3128'
+#            HTTPS_PROXY: 'http://proxy:3128'
+#            NO_PROXY: 'localhost,127.0.0.1,0.0.0.0,10.0.0.0/8,cattle-system.svc,.svc,.cluster.local,${DOMAIN_NAME}'
+#            TZ: '${LOCAL_TIMEZONE}'
+        entrypoint: bash -c "rancher --no-cacerts --acme-domain ${DOMAIN_NAME}"
 
     certbot:
         depends_on:
             - proxy
-        image: certbot/certbot
+        image: certbot/certbot:latest
         container_name: certbot
         networks:
             - backend
         volumes:
             - 'certbot-etc:${LETSENCRYPT_CONF_PREFIX}'
-            - '/tmp/acme-challenge:/tmp/acme-challenge'                        
-        restart: unless-stopped        
+            - 'certbot-var:/var/lib/letsencrypt'
+            - '/tmp/acme-challenge:/tmp/acme-challenge'
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "test -d ${LETSENCRYPT_CONF_PREFIX}/live/${DOMAIN_NAME} || exit 1"]
+            interval: 5s
+            timeout: 5s
+            retries: 20
         environment:
             TZ: '${LOCAL_TIMEZONE}'
-        entrypoint: /bin/sh -c "certbot certonly --webroot --webroot-path /tmp/acme-challenge --rsa-key-size 4096 --non-interactive --agree-tos --no-eff-email --force-renewal --email ${LETSENCRYPT_EMAIL} -d ${DOMAIN_NAME} -d www.${DOMAIN_NAME}; 
-            trap exit TERM; while :; do certbot renew --dry-run; sleep 12h & wait $${!}; done;"
+        entrypoint: /bin/sh -c "${SSL_SNIPPET}; trap exit TERM; while :; do certbot renew --dry-run; sleep 12h & wait $${!}; done;"
 
     proxy:
         image: nginx:stable
@@ -74,9 +88,6 @@ networks:
 
 volumes:
     certbot-etc:
-        name: certbot-etc
-        driver: local
-        driver_opts:
-            type: none
-            device: ${DIRECTORY_PATH}/certbot
-            o: bind
+        external: true
+    certbot-var:
+        name: certbot-var
