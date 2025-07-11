@@ -6,12 +6,12 @@ if [ -z $1 ]; then
 	exit 1;
 fi
 
-# if [ ! -f $2/ssl-dhparam.pem 2>/dev/null ]; then
-#	openssl dhparam -out $2/ssl-dhparam.pem 2048
-# fi
+if [ ! -f $2/ssl-dhparam.pem 2>/dev/null ]; then
+	openssl dhparam -out $2/ssl-dhparam.pem 2048
+fi
 
 use_lets_encrypt_certificates() {
-	echo "switching nginx to use Let's Encrypt certificate for $1"	
+	echo "switching proxy to use Let's Encrypt certificate for $1"	
 	sed '/#location.\/./,/#}/ s/#//; s/#listen/listen/g; s/#ssl_/ssl_/g' $3/conf.d/default.conf > $3/conf.d/default.conf.bak
 }
 
