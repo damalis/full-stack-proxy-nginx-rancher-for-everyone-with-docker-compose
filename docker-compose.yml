@@ -1,9 +1,6 @@
 services:
 
     rancher:
-        depends_on:
-            certbot:
-                condition: service_healthy
         image: 'rancher/rancher:${RANCHER_IMAGE_VERSION}'
         container_name: rancher
         networks:
@@ -17,15 +14,13 @@ services:
         ports:
             - '8080:80'
             - '8443:443'
-        links:
-            - proxy
         privileged: true
         cgroup: host
         environment:
             SSL_CERT_DIR: '${LETSENCRYPT_CONF_PREFIX}/live/${DOMAIN_NAME}'
 #            HTTP_PROXY: 'http://proxy:3128'
 #            HTTPS_PROXY: 'http://proxy:3128'
-#            NO_PROXY: 'localhost,127.0.0.1,0.0.0.0,10.0.0.0/8,cattle-system.svc,.svc,.cluster.local,${DOMAIN_NAME}'
+            NO_PROXY: 'localhost,127.0.0.1,0.0.0.0,10.0.0.0/8,cattle-system.svc,.svc,.cluster.local,${DOMAIN_NAME}'
 #            TZ: '${LOCAL_TIMEZONE}'
         entrypoint: bash -c "rancher --no-cacerts --acme-domain ${DOMAIN_NAME}"
 
@@ -51,6 +46,8 @@ services:
         entrypoint: /bin/sh -c "${SSL_SNIPPET}; trap exit TERM; while :; do certbot renew --dry-run; sleep 12h & wait $${!}; done;"
 
     proxy:
+        depends_on:
+            - proxy
         image: nginx:stable
         container_name: proxy
         networks:
