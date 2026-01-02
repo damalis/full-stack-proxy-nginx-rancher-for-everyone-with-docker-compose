@@ -59,6 +59,17 @@ Create rules to open ports to the internet, or to a specific IPv4 address or ran
 - https: 443
 - portainer: 9001
 
+#### Requirements
+
+Make sure you have the latest versions of **Docker** and **Docker Compose** installed on your machine.
+
+#### These CPU and memory requirements apply to a host with a single-node installation of Rancher
+
+| Deployment Size | Clusters | Nodes | vCPUs | RAM |
+|---|---|---|---|---|
+| Small | Up to 5 | Up to 50 | 1 | 4 GB |
+| Medium | Up to 15 | Up to 200 | 2 | 8 GB |
+
 #### Contents:
 
 - [Auto Configuration and Installation](#automatic)
@@ -89,17 +100,6 @@ sudo LC_ALL=C.UTF-8 ./install.sh # LC_ALL=C.UTF-8 if not os language english
 ```
 
 ### Manual
-
-#### Requirements
-
-Make sure you have the latest versions of **Docker** and **Docker Compose** installed on your machine.
-
-#### These CPU and memory requirements apply to a host with a single-node installation of Rancher
-
-| Deployment Size | Clusters | Nodes | vCPUs | RAM |
-|---|---|---|---|---|
-| Small | Up to 5 | Up to 50 | 1 | 4 GB |
-| Medium | Up to 15 | Up to 200 | 2 | 8 GB |
 
 - [How install docker](https://ranchermanager.docs.rancher.com/v2.12/getting-started/installation-and-upgrade/installation-requirements/install-docker)
 - [How install docker compose](https://docs.docker.com/compose/install/)
