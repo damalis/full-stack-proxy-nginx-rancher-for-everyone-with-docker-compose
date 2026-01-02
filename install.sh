@@ -2,12 +2,12 @@
 
 clear
 echo
-echo "=========================================================================="
-echo "|                                                                        |"
-echo "|    full-stack-proxy-nginx-rancher-for-everyone-with-docker-compose     |"
-echo "|                        by Erdal ALTIN                                  |"
-echo "|                                                                        |"
-echo "=========================================================================="
+echo "======================================================================="
+echo "|                                                                     |"
+echo "|   full-stack-proxy-nginx-rancher-for-everyone-with-docker-compose   |"
+echo "|                       by Erdal ALTIN                                |"
+echo "|                                                                     |"
+echo "======================================================================="
 sleep 2
 
 echo
