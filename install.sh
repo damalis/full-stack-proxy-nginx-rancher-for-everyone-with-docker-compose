@@ -20,7 +20,7 @@ if [[ -f /etc/os-release ]]; then
 	echo "Distro       : $PRETTY_NAME"
 	echo "ID           : $ID"
 	echo "ID_LIKE      : $ID_LIKE"
-	id_like=$(grep -Pow 'ID_LIKE=\K[^;]*' /etc/os-release | tr -d '"' | grep -obe 'debian' -e 'ubuntu' -e 'centos' -e 'fedora' -e 'suse' -e 'rhel' | grep -oE '[A-Za-z]+' | head -n 1)
+	id_like=$(grep -Pow 'ID_LIKE=\K[^;]*' /etc/os-release | tr -d '"' | grep -obe 'debian' -e 'ubuntu' -e 'centos' -e 'fedora' -e 'suse' -e 'rhel' | grep -oE '[A-Za-z]+' | head -n 1) 2>&1 > /dev/null
 	echo "Version      : $VERSION_ID"
 	echo "Codename     : $VERSION_CODENAME (or $UBUNTU_CODENAME)"
 elif [[ -f /usr/lib/os-release ]]; then
@@ -28,7 +28,7 @@ elif [[ -f /usr/lib/os-release ]]; then
         echo "Distro       : $PRETTY_NAME"
         echo "ID           : $ID"
 	echo "ID_LIKE      : $ID_LIKE"
-	id_like=$(grep -Pow 'ID_LIKE=\K[^;]*' /usr/lib/os-release | tr -d '"' | grep -obe 'debian' -e 'ubuntu' -e 'centos' -e 'fedora' -e 'suse' -e 'rhel' | grep -oE '[A-Za-z]+' | head -n 1)
+	id_like=$(grep -Pow 'ID_LIKE=\K[^;]*' /usr/lib/os-release | tr -d '"' | grep -obe 'debian' -e 'ubuntu' -e 'centos' -e 'fedora' -e 'suse' -e 'rhel' | grep -oE '[A-Za-z]+' | head -n 1) 2>&1 > /dev/null
         echo "Version      : $VERSION_ID"
         echo "Codename     : $VERSION_CODENAME (or $UBUNTU_CODENAME)"
 else
@@ -389,21 +389,13 @@ sleep 2
 
 # set the host
 which_h=""
-items=("localhost" "remotehost")
-PS3="which computer command line are you on? Select the host: "
-select h in "${items[@]}"
-do
-	case $REPLY in
-		1)
-			which_h=$h
-			break;;
-		2)
-			which_h=$h
-			break;;
-		*)
-			echo "Invalid choice $REPLY";;
-	esac
-done
+if [ -n "${SSH_CLIENT}" ] || [ -n "${SSH_TTY}" ] || [ -n "${SSH_CONNECTION}" ]; then
+	echo "Running REMOTELY via SSH (on another host / remote OS)"
+	which_h="remotehost"
+else
+	echo "Running LOCALLY on localhost (the same machine)"
+	which_h="localhost"
+fi
 echo "Ok."
 
 # set your domain name
@@ -449,22 +441,22 @@ then
 	ssl_snippet="echo 'Generated Self-signed SSL Certificate at localhost'"
 	if [ "$lpms" == "apk" ]
 	then
-		sudo apk add --no-cache nss-tools go git
+		sudo apk add --no-cache nss-tools go
 	elif [ "$lpms" == "dnf" ]
 	then
-		sudo dnf install nss-tools go git
+		sudo dnf -y install nss-tools golang
 	elif [ "$lpms" == "yum" ]
 	then
-		sudo yum install nss-tools go git
+		sudo yum -y install nss-tools golang
 	elif [ "$lpms" == "zypper" ]
 	then
-		sudo zypper install mozilla-nss-tools go git
+		sudo zypper install -y mozilla-nss-tools go
 	elif [ "$lpms" == "apt" ]
 	then
-		sudo apt install libnss3-tools go git
+		sudo apt -y install libnss3-tools golang
 	elif [ "$lpms" == "pacman" ]
 	then
-		sudo pacman -S nss go git
+		sudo pacman -S --noconfirm nss go
 	else
 		echo
 		echo "No supported package manager found"
@@ -474,7 +466,7 @@ then
 	sudo rm -Rf mkcert && git clone https://github.com/FiloSottile/mkcert &&
 	cd ./mkcert
 	sudo go build -ldflags "-X main.Version=$(git describe --tags)"
-	sudo ./mkcert -uninstall && ./mkcert -install && ./mkcert -key-file privkey.pem -cert-file chain.pem $domain_name *.$domain_name && sudo cat privkey.pem chain.pem > fullchain.pem && sudo mkdir -p ../certbot/live/$domain_name && sudo mv *.pem ../certbot/live/$domain_name
+	./mkcert -uninstall && ./mkcert -install && ./mkcert -key-file privkey.pem -cert-file chain.pem $domain_name *.$domain_name && sudo cat privkey.pem chain.pem > fullchain.pem && sudo mkdir -p ../certbot/live/$domain_name && sudo mv *.pem ../certbot/live/$domain_name
 	cd ..
 	echo "Ok."
 else
@@ -513,12 +505,10 @@ case "$choice" in
   * ) echo "Invalid input! Aborting now..."; exit 0;;
 esac
 
-\cp env.example .env
+sudo \cp env.example .env
 
-sed -i 's/example.com/'$domain_name'/' .env
-sed -i 's/email@domain.com/'$email'/' .env
-sed -i "s/ssl_snippet/$ssl_snippet/" .env										 
-sed -i "s@directory_path@$(pwd)@" .env
+sed -i 's/example.com/'$domain_name'/' .envsed -i 's/email@domain.com/'$email'/' .env
+sed -i "s/ssl_snippet/$ssl_snippet/" .env										 sed -i "s@directory_path@$(pwd)@" .env
 sed -i 's/local_timezone/'$local_timezone'/' .env
 
 if [ -x "$(command -v docker)" ] && [ "$(docker compose version)" ]; then	

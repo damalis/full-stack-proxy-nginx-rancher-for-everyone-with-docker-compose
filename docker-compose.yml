@@ -52,8 +52,8 @@ services:
               source: ./proxy/templates/proxy.conf.template
               target: '${PROXY_PREFIX}/templates/default.conf.template'
             - type: bind
-              source: ./proxy/ssl-option/options-ssl-nginx.conf
-              target: '${LETSENCRYPT_CONF_PREFIX}/options-ssl-nginx.conf'
+              source: ./proxy/ssl-option/options-ssl-nginx-proxy.conf
+              target: '${LETSENCRYPT_CONF_PREFIX}/options-ssl-nginx-proxy.conf'
             - type: bind
               source: ./ssl-proxyconf.sh
               target: '/tmp/ssl-proxyconf.sh'
@@ -68,7 +68,7 @@ services:
             test: ["CMD-SHELL", "/bin/pidof nginx > /dev/null || exit 1"]
             interval: 10s
             timeout: 5s
-            retries: 5
+            retries: 20
         environment:
             NGINX_HOST: ${DOMAIN_NAME}
             NGINX_PORT: 80
